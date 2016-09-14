@@ -122,11 +122,7 @@ else
     image=/tmp/image.img.${extension}
   fi
 
-  if [ ! -f "${image}" ]; then
-    echo "File not found."
-    exit 10
-  fi
-
+ 
   if [[ "$(file "${image}")" == *"Zip archive"* ]]; then
     echo "Uncompressing ${image} ..."
     unzip -o "${image}" -d /tmp
@@ -191,18 +187,6 @@ while true; do
     echo "👎  The SD card is write protected. Please eject, remove protection and insert again."
   fi
 done
-
-echo "Flashing ${image} to ${disk} ..."
-if [[ -x $(which pv) ]]; then
-  # this sudo here is used for a login without pv's progress bar
-  # hiding the password prompt
-  size=$(sudo /usr/bin/stat -f %z ${image})
-  pv -s "${size}" < ${image} | sudo /bin/dd bs=1m "of=/dev/r${disk}"
-else
-  echo "No 'pv' command found, so no progress available."
-  echo "Press CTRL+T if you want to see the current info of dd command."
-  sudo /bin/dd bs=1m if=${image} "of=/dev/r${disk}"
-fi
 
 boot=$(df | grep --color=never "/dev/${disk}s1" | /usr/bin/sed 's,.*/Volumes,/Volumes,')
 if [ "${boot}" == "" ]; then
